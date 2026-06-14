@@ -6,7 +6,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.nettakrim.signed_paintings.SignedPaintingsClient;
 import com.nettakrim.signed_paintings.access.AbstractSignEditScreenAccessor;
 import com.nettakrim.signed_paintings.access.SignBlockEntityAccessor;
-import com.nettakrim.signed_paintings.gui.*;
+import com.nettakrim.signed_paintings.gui.BackgroundClick;
+import com.nettakrim.signed_paintings.gui.InputSlider;
+import com.nettakrim.signed_paintings.gui.SignEditingInfo;
+import com.nettakrim.signed_paintings.gui.UIHelper;
 import com.nettakrim.signed_paintings.rendering.PaintingInfo;
 import com.nettakrim.signed_paintings.rendering.SignSideInfo;
 import com.nettakrim.signed_paintings.util.ImageManager;
@@ -96,12 +99,12 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
     protected abstract void setMessage(String message);
 
     @WrapWithCondition(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;centeredText(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V"))
-    private boolean shouldRenderTitle(GuiGraphicsExtractor context, Font font, Component text, int x, int y, int color){
+    private boolean shouldRenderTitle(GuiGraphicsExtractor context, Font font, Component text, int x, int y, int color) {
         return !isInfoCorrect();
     }
 
     @WrapOperation(method = "extractSign", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;translate(FF)Lorg/joml/Matrix3x2f;"))
-    private Matrix3x2f translateForRender(Matrix3x2fStack instance, float x, float y, Operation<Matrix3x2f> original){
+    private Matrix3x2f translateForRender(Matrix3x2fStack instance, float x, float y, Operation<Matrix3x2f> original) {
         if (isInfoCorrect()) {
             float offset = 0f;
             //noinspection ConstantValue,EqualsBetweenInconvertibleTypes
@@ -151,11 +154,11 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
 
         int y = FabricLoader.getInstance().isModLoaded("stendhal") ? 40 : (this.height / 4 + 144);
 
-        disclaimer = new StringWidget(0, y-43, this.width, 25, Component.empty(), font);
+        disclaimer = new StringWidget(0, y - 43, this.width, 25, Component.empty(), font);
         disclaimer.visible = false;
         addRenderableWidget(disclaimer);
 
-        uploadButton = Button.builder(Component.translatable(SignedPaintingsClient.MODID + ".create_prompt"), button -> this.createPainting()).bounds(this.width / 2 - 100, y-25, 200, 20).build();
+        uploadButton = Button.builder(Component.translatable(SignedPaintingsClient.MODID + ".create_prompt"), button -> this.createPainting()).bounds(this.width / 2 - 100, y - 25, 200, 20).build();
         addRenderableWidget(uploadButton);
         addWidget(uploadButton);
 
@@ -167,13 +170,13 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
 
         boolean correct = isInfoCorrect();
         signedPaintings$setVisibility(correct);
-        SignSideInfo sideInfo = ((SignBlockEntityAccessor)sign).signedPaintings$getSideInfo(isFrontText);
+        SignSideInfo sideInfo = ((SignBlockEntityAccessor) sign).signedPaintings$getSideInfo(isFrontText);
         String currentUrl = sideInfo.getUrl();
         if (correct || currentUrl.isBlank() || currentUrl.equals("https://")) {
             uploadButton.visible = false;
         } else {
             url = currentUrl;
-            updateUploadButton(true);
+            updateUploadButton();
             url = null;
         }
 
@@ -248,9 +251,9 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
         if (ImageManager.isValid(pasteString) || pasteString.matches(".*([/:\\\\]).*\\|$")) {
             url = pasteURL;
             if (url.startsWith("https://images-ext-1.discordapp.net/external/")) {
-                url = URLDecoder.decode(url.substring(url.substring(45).indexOf('/')+46).replaceFirst("/","://"), StandardCharsets.UTF_8);
+                url = URLDecoder.decode(url.substring(url.substring(45).indexOf('/') + 46).replaceFirst("/", "://"), StandardCharsets.UTF_8);
             }
-            updateUploadButton(false);
+            updateUploadButton();
         }
 
         String[] newMessages = new String[messages.length];
@@ -305,24 +308,22 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
     }
 
     @Unique
-    private void updateUploadButton(boolean isExisting) {
+    private void updateUploadButton() {
         // stendhal compat
         if (uploadButton == null) {
             onInit(null);
         }
 
-        int start = url.indexOf('/')+2;
-        domain = url.substring(0, url.substring(start).indexOf('/')+start+1);
-        boolean blocked = SignedPaintingsClient.imageManager.domainBlocked(domain);
+        int start = url.indexOf('/') + 2;
+        domain = url.substring(0, url.substring(start).indexOf('/') + start + 1);
 
-        String key = blocked ? (isExisting ? ".trust" : ".create_trust") : ".create";
-        uploadButton.setMessage(Component.translatable(SignedPaintingsClient.MODID + key));
-        uploadButton.setTooltip(Tooltip.create(Component.translatable(SignedPaintingsClient.MODID + key+"_info", domain.substring(start, domain.length()-1), Component.translatable(SignedPaintingsClient.MODID + ".trust_disclaimer"))));
+        uploadButton.setMessage(Component.translatable(SignedPaintingsClient.MODID + ".create"));
+        uploadButton.setTooltip(Tooltip.create(Component.translatable(SignedPaintingsClient.MODID + ".create_info", domain.substring(start, domain.length() - 1))));
         uploadButton.visible = true;
 
         if (url.startsWith("https://media.discordapp.net")) {
             url = url.replace("format=webp", "format=png");
-            activateDisclaimer(Component.translatable(SignedPaintingsClient.MODID+".disclaimer.discord"));
+            activateDisclaimer(Component.translatable(SignedPaintingsClient.MODID + ".disclaimer.discord"));
             return;
         }
 
@@ -335,7 +336,7 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
             return;
         }
 
-        String format = path.substring(i+1);
+        String format = path.substring(i + 1);
 
         for (String supported : ImageIO.getReaderFormatNames()) {
             if (supported.equals(format)) {
@@ -355,8 +356,6 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
 
     @Unique
     private void createPainting() {
-        SignedPaintingsClient.imageManager.trustDomain(domain);
-        SignedPaintingsClient.imageManager.blockPromptedDomains.remove(domain);
         uploadButton.visible = false;
         disclaimer.visible = false;
 
@@ -392,7 +391,9 @@ public abstract class AbstractSignEditScreenMixin extends Screen implements Abst
             // just force closing the screen stops this
             // TODO: fix this propery?
             Minecraft.getInstance().schedule(() -> Minecraft.getInstance().setScreen(null));
-            signField = new TextFieldHelper(() -> "", (s) -> {}, () -> "", (s) -> {}, (s) -> true);
+            signField = new TextFieldHelper(() -> "", (s) -> {
+            }, () -> "", (s) -> {
+            }, (s) -> true);
             onInit(null);
         }
     }

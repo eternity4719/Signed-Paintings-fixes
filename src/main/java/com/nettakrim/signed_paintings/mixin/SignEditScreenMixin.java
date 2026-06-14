@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class SignEditScreenMixin {
     @WrapOperation(method = "extractSignBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;sign(Lnet/minecraft/client/model/Model$Simple;FLnet/minecraft/world/level/block/state/properties/WoodType;IIII)V"))
     private void offsetSign(GuiGraphicsExtractor instance, Model.Simple model, float scale, WoodType woodType, int x1, int y1, int x2, int y2, Operation<Void> original) {
-        int state = ((AbstractSignEditScreenAccessor)this).signedPaintings$internalRenderState();
+        int state = ((AbstractSignEditScreenAccessor) this).signedPaintings$internalRenderState();
         if (state == 0) {
             original.call(instance, model, scale, woodType, x1, y1, x2, y2);
             return;

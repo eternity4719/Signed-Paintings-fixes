@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+
 import java.util.concurrent.CompletableFuture;
 
 public class BlockCommand {
@@ -31,8 +32,8 @@ public class BlockCommand {
                 .literal("add")
                 .then(
                         ClientCommands.argument("url", StringArgumentType.greedyString())
-                        .suggests(SignedPaintingsCommands.images)
-                        .executes(BlockCommand::block)
+                                .suggests(SignedPaintingsCommands.images)
+                                .executes(BlockCommand::block)
                 )
                 .build();
 
@@ -40,8 +41,8 @@ public class BlockCommand {
                 .literal("remove")
                 .then(
                         ClientCommands.argument("url", StringArgumentType.greedyString())
-                        .suggests(blocked)
-                        .executes(BlockCommand::unblock)
+                                .suggests(blocked)
+                                .executes(BlockCommand::unblock)
                 )
                 .build();
 
@@ -66,9 +67,9 @@ public class BlockCommand {
         String url = StringArgumentType.getString(context, "url");
         if (url.equals("all")) {
             SignedPaintingsClient.imageManager.blockedURLs.addAll(SignedPaintingsClient.imageManager.getUrls());
-            MutableComponent text = Component.translatable(SignedPaintingsClient.MODID+".commands.block.add.all");
+            MutableComponent text = Component.translatable(SignedPaintingsClient.MODID + ".commands.block.add.all");
             for (String newBlock : SignedPaintingsClient.imageManager.getUrls()) {
-                text.append(Component.translatable(SignedPaintingsClient.MODID+".commands.block.list", newBlock).setStyle(SignedPaintingsClient.getUrlButton(newBlock)));
+                text.append(Component.translatable(SignedPaintingsClient.MODID + ".commands.block.list", newBlock).setStyle(SignedPaintingsClient.getUrlButton(newBlock)));
             }
             SignedPaintingsClient.imageManager.reloadAll();
             SignedPaintingsClient.longSay(text);
@@ -99,12 +100,12 @@ public class BlockCommand {
     }
 
     private static int list(CommandContext<FabricClientCommandSource> context) {
-        MutableComponent text = Component.translatable(SignedPaintingsClient.MODID+".commands.block.list.start");
+        MutableComponent text = Component.translatable(SignedPaintingsClient.MODID + ".commands.block.list.start");
         for (String url : SignedPaintingsClient.imageManager.blockedURLs) {
-            text.append(Component.translatable(SignedPaintingsClient.MODID+".commands.block.list", url).setStyle(SignedPaintingsClient.getUrlButton(url)));
+            text.append(Component.translatable(SignedPaintingsClient.MODID + ".commands.block.list", url).setStyle(SignedPaintingsClient.getUrlButton(url)));
         }
         if (SignedPaintingsClient.imageManager.blockedURLs.isEmpty()) {
-            text.append(Component.translatable(SignedPaintingsClient.MODID+".commands.block.list.none"));
+            text.append(Component.translatable(SignedPaintingsClient.MODID + ".commands.block.list.none"));
         }
         SignedPaintingsClient.longSay(text);
         return SignedPaintingsClient.imageManager.blockedURLs.size();
@@ -113,7 +114,7 @@ public class BlockCommand {
     private static int auto(CommandContext<FabricClientCommandSource> context) {
         SignedPaintingsClient.imageManager.autoBlockNew = !SignedPaintingsClient.imageManager.autoBlockNew;
         if (SignedPaintingsClient.imageManager.autoBlockNew) {
-            SignedPaintingsClient.longSay(Component.translatable(SignedPaintingsClient.MODID+".commands.block.auto.on"));
+            SignedPaintingsClient.longSay(Component.translatable(SignedPaintingsClient.MODID + ".commands.block.auto.on"));
             return 1;
         } else {
             SignedPaintingsClient.sayTranslated("commands.block.auto.off");

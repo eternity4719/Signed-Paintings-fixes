@@ -2,14 +2,17 @@ package com.nettakrim.signed_paintings.util;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.nettakrim.signed_paintings.SignedPaintingsClient;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.Identifier;
 
 public class ImageData {
     private BufferedImage baseImage;
@@ -74,7 +77,7 @@ public class ImageData {
                 identifier = baseIdentifier;
                 bufferedImage = baseImage;
             } else {
-                identifier = baseIdentifier.withSuffix("_"+width+"x"+height);
+                identifier = baseIdentifier.withSuffix("_" + width + "x" + height);
                 bufferedImage = scaleImage(baseImage, width, height);
             }
 
@@ -87,8 +90,7 @@ public class ImageData {
             loadingImages.add(identifier);
 
             ImageManager.saveBufferedImageAsIdentifierAsync(bufferedImage, identifier).handleAsync((v, e) -> {
-                if (e != null)
-                {
+                if (e != null) {
                     loadingImages.remove(identifier);
                     return null;
                 }
@@ -142,7 +144,7 @@ public class ImageData {
 
     private long getBytes(NativeImage image) {
         long bytesPerPixel = image.format().components();
-        return image.getWidth()*image.getHeight()*bytesPerPixel;
+        return image.getWidth() * image.getHeight() * bytesPerPixel;
     }
 
     public boolean checkRenderTime(int expireVram, int expireFully) {
@@ -150,17 +152,17 @@ public class ImageData {
             return false;
         }
 
-        for (Iterator<VariantData> iterator = images.values().iterator(); iterator.hasNext();) {
+        for (Iterator<VariantData> iterator = images.values().iterator(); iterator.hasNext(); ) {
             VariantData variantData = iterator.next();
             if (variantData.renderTime < expireVram) {
-                SignedPaintingsClient.info("removing expired image variant "+variantData.identifier, false);
+                SignedPaintingsClient.info("removing expired image variant " + variantData.identifier, false);
                 ImageManager.removeImage(variantData.identifier);
                 iterator.remove();
             }
         }
 
         if (workingRenderTime != -1 && workingRenderTime < expireVram) {
-            SignedPaintingsClient.info("removing expired image variant "+workingIdentifier, false);
+            SignedPaintingsClient.info("removing expired image variant " + workingIdentifier, false);
             ImageManager.removeImage(workingIdentifier);
             workingRenderTime = -1;
         }

@@ -19,9 +19,9 @@ public class Centering {
 
     public static float getOffset(float size, Type centering) {
         return switch (centering) {
-            case MIN -> (size-1)/2;
+            case MIN -> (size - 1) / 2;
             case CENTER -> 0;
-            case MAX -> (1-size)/2;
+            case MAX -> (1 - size) / 2;
         };
     }
 
@@ -29,7 +29,7 @@ public class Centering {
         return switch (centering) {
             case MIN -> xAxis ? "R" : "T";
             case CENTER -> "C";
-            case MAX -> xAxis ? "L": "B";
+            case MAX -> xAxis ? "L" : "B";
         };
     }
 

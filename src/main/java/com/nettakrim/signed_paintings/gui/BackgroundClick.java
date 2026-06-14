@@ -16,10 +16,12 @@ public class BackgroundClick extends AbstractWidget {
     }
 
     @Override
-    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
+    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {}
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+    }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
@@ -31,5 +33,6 @@ public class BackgroundClick extends AbstractWidget {
     }
 
     @Override
-    public void playDownSound(SoundManager soundManager) {}
+    public void playDownSound(SoundManager soundManager) {
+    }
 }

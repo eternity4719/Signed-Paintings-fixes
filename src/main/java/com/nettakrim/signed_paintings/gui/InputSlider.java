@@ -1,10 +1,6 @@
 package com.nettakrim.signed_paintings.gui;
 
 import com.nettakrim.signed_paintings.SignedPaintingsClient;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.function.Consumer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -12,6 +8,10 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.function.Consumer;
 
 public class InputSlider {
     public final InputTextFieldWidget textFieldWidget;
@@ -31,7 +31,7 @@ public class InputSlider {
         sliderWidget = createSlider(x, y, sliderWidth, height, text, minSlider, maxSlider, sliderStep);
         sliderWidget.setChangedListener(this::onSliderChanged);
 
-        textFieldWidget = createTextField(x+sliderWidth+elementSpacing+1, y+1, textWidth-2, height-2);
+        textFieldWidget = createTextField(x + sliderWidth + elementSpacing + 1, y + 1, textWidth - 2, height - 2);
         textFieldWidget.setResponder(this::onTextChanged);
 
         setValue(startingValue);
@@ -75,8 +75,7 @@ public class InputSlider {
         try {
             onChange(Float.parseFloat(newValue));
             updateSlider();
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
 
         }
     }
@@ -104,7 +103,8 @@ public class InputSlider {
     }
 
     private void updateTextField() {
-        textFieldWidget.setResponder((s) -> {});
+        textFieldWidget.setResponder((s) -> {
+        });
         textFieldWidget.setValue(Float.toString(value));
         textFieldWidget.moveCursorToStart(false);
         textFieldWidget.setResponder(this::onTextChanged);
@@ -150,12 +150,13 @@ public class InputSlider {
         }
 
         @Override
-        protected void updateMessage() {}
+        protected void updateMessage() {
+        }
 
         @Override
         public boolean keyPressed(KeyEvent input) {
             if (input.input() == 263 || input.input() == 262) {
-                value = Mth.clamp(value + (input.input() == 263 ? -step : step)/(max-min), 0, 1);
+                value = Mth.clamp(value + (input.input() == 263 ? -step : step) / (max - min), 0, 1);
                 applyValue();
                 return true;
             }
@@ -164,9 +165,9 @@ public class InputSlider {
 
         @Override
         protected void applyValue() {
-            float round = (max-min)/step;
-            value = Math.round(value*round)/round;
-            float result = (float)(min + (max-min) * value);
+            float round = (max - min) / step;
+            value = Math.round(value * round) / round;
+            float result = (float) (min + (max - min) * value);
             if (Double.isFinite(value)) {
                 BigDecimal bd = new BigDecimal(result);
                 onChange.accept(bd.setScale(3, RoundingMode.HALF_UP).floatValue());
@@ -174,7 +175,7 @@ public class InputSlider {
         }
 
         public void setValue(float to) {
-            to = (to - min)/(max - min);
+            to = (to - min) / (max - min);
             value = Mth.clamp(to, 0, 1);
             updateMessage();
         }

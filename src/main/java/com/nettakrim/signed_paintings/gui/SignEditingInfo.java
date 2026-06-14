@@ -23,6 +23,6 @@ public class SignEditingInfo {
     }
 
     public SignSideInfo getSideInfo(boolean front) {
-        return ((SignBlockEntityAccessor)sign).signedPaintings$getSideInfo(front);
+        return ((SignBlockEntityAccessor) sign).signedPaintings$getSideInfo(front);
     }
 }

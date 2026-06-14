@@ -1,6 +1,7 @@
 package com.nettakrim.signed_paintings.access;
 
-import com.nettakrim.signed_paintings.rendering.*;
+import com.nettakrim.signed_paintings.rendering.PaintingInfo;
+import com.nettakrim.signed_paintings.rendering.SignSideInfo;
 
 public interface SignBlockEntityAccessor {
     PaintingInfo signedPaintings$getFrontPaintingInfo();

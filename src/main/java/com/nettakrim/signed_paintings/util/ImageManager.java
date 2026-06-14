@@ -15,8 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.PngInfo;
-import java.net.URI;
-import java.nio.IntBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -25,9 +23,14 @@ import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -47,7 +50,6 @@ public class ImageManager {
     private final HashMap<String, ArrayList<ImageDataLoadInterface>> pendingImageLoads;
     public final ArrayList<String> blockedURLs;
     public final Set<String> trustedDomains;
-    public final Set<String> blockPromptedDomains;
     public boolean autoBlockNew = false;
     public int renderTime = 0;
 
@@ -55,6 +57,7 @@ public class ImageManager {
     private static final Executor singleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private boolean changesMade = false;
+
     public boolean hasTranslucency(Identifier id) {
         return translucencyCache.getOrDefault(id, false);
     }
@@ -103,7 +106,6 @@ public class ImageManager {
         pendingImageLoads = new HashMap<>();
         blockedURLs = new ArrayList<>();
         trustedDomains = new HashSet<>();
-        blockPromptedDomains = new HashSet<>();
 
         data = FabricLoader.getInstance().getConfigDir().resolve("signed_paintings.txt").toFile();
         try {
@@ -120,7 +122,7 @@ public class ImageManager {
                         phase = -1;
                     } else {
                         // loading older format without version header, user needs to be notified about upload removal
-                        SignedPaintingsClient.sayText(Component.translatable(SignedPaintingsClient.MODID+".upload_change_notification").setStyle(SignedPaintingsClient.getUrlButton("https://github.com/Nettakrim/Signed-Paintings/blob/fixes/upload_removal.md")));
+                        SignedPaintingsClient.sayText(Component.translatable(SignedPaintingsClient.MODID + ".upload_change_notification").setStyle(SignedPaintingsClient.getUrlButton("https://github.com/Nettakrim/Signed-Paintings/blob/fixes/upload_removal.md")));
                         makeChange();
                     }
                 }
@@ -160,7 +162,7 @@ public class ImageManager {
                         if (parts.length == 3) {
                             urlAliases.add(new URLAlias(parts[0], parts[2].split(" "), parts[1]));
                         } else {
-                            SignedPaintingsClient.info("invalid url alias: \""+s+"\"", true);
+                            SignedPaintingsClient.info("invalid url alias: \"" + s + "\"", true);
                         }
                     }
                 }
@@ -177,14 +179,6 @@ public class ImageManager {
             registerURLAlias(new URLAlias("https://iili.io/", new String[]{"freeimage.host/i/", "iili:"}, ".png"));
             makeChange();
         }
-        if (trustedDomains.isEmpty()) {
-            trustDomain("https://i.imgur.com/");
-            trustDomain("https://iili.io/");
-            trustDomain("https://i.ibb.co/");
-            trustDomain("https://upload.wikimedia.org/");
-            trustDomain("https://web.archive.org/");
-            makeChange();
-        }
     }
 
     public void save() {
@@ -195,7 +189,7 @@ public class ImageManager {
             }
             FileWriter writer = new FileWriter(data);
 
-            StringBuilder s = new StringBuilder(dataHeader+dataVersion);
+            StringBuilder s = new StringBuilder(dataHeader + dataVersion);
             s.append("\n- Blocked Painting URLs -");
             for (String url : blockedURLs) {
                 s.append("\n").append(url);
@@ -225,7 +219,7 @@ public class ImageManager {
             writer.close();
             changesMade = false;
         } catch (IOException e) {
-            SignedPaintingsClient.info("Failed to save data\n"+e.getMessage()+"\n"+Arrays.toString(e.getStackTrace()), true);
+            SignedPaintingsClient.info("Failed to save data\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()), true);
         }
     }
 
@@ -238,12 +232,12 @@ public class ImageManager {
 
         if (!blocked && autoBlockNew) {
             SignedPaintingsClient.sayRaw(
-                Component.translatable(SignedPaintingsClient.MODID+".commands.block.notify.base",
-                    Component.translatable(SignedPaintingsClient.MODID+".commands.block.notify.text", url)
-                            .setStyle(Style.EMPTY.withColor(SignedPaintingsClient.textColor).withClickEvent(new ClickEvent.SuggestCommand("/paintings:block remove "+url)))
-                    )
-                    .setStyle(Style.EMPTY.withColor(SignedPaintingsClient.nameTextColor)
-                )
+                    Component.translatable(SignedPaintingsClient.MODID + ".commands.block.notify.base",
+                                    Component.translatable(SignedPaintingsClient.MODID + ".commands.block.notify.text", url)
+                                            .setStyle(Style.EMPTY.withColor(SignedPaintingsClient.textColor).withClickEvent(new ClickEvent.SuggestCommand("/paintings:block remove " + url)))
+                            )
+                            .setStyle(Style.EMPTY.withColor(SignedPaintingsClient.nameTextColor)
+                            )
             );
             blockedURLs.add(url);
             blocked = true;
@@ -273,13 +267,13 @@ public class ImageManager {
             return;
         }
         pendingImageLoads.put(url, onLoadCallbacks);
-        SignedPaintingsClient.info("Started loading image from "+url, false);
+        SignedPaintingsClient.info("Started loading image from " + url, false);
         downloadImageBuffer(url).orTimeout(60, TimeUnit.SECONDS).handleAsync((image, ex) -> {
             if (image == null || ex != null) {
                 urlToImageData.remove(url);
-                SignedPaintingsClient.info("Couldn't load image "+url+"\n"+ex.toString(), true);
+                SignedPaintingsClient.info("Couldn't load image " + url + "\n" + ex.toString(), true);
             } else {
-                SignedPaintingsClient.info("Loaded image "+url, false);
+                SignedPaintingsClient.info("Loaded image " + url, false);
                 onImageLoad(image, url, data);
                 for (ImageDataLoadInterface imageDataLoadInterface : onLoadCallbacks) {
                     imageDataLoadInterface.onLoad(data);
@@ -293,7 +287,7 @@ public class ImageManager {
     private void onImageLoad(BufferedImage image, String url, ImageData data) {
         Identifier identifier = Identifier.fromNamespaceAndPath(SignedPaintingsClient.MODID, createIdentifierSafeStringFromURL(url));
         data.onImageReady(image, identifier);
-        SignedPaintingsClient.info("Ready to render Image "+url, true);
+        SignedPaintingsClient.info("Ready to render Image " + url, true);
     }
 
     private String createIdentifierSafeStringFromURL(String url) {
@@ -380,7 +374,7 @@ public class ImageManager {
     }
 
     public static AbstractTexture getTexture(Identifier identifier) {
-        return ((TextureManagerAccessor)SignedPaintingsClient.client.getTextureManager()).getByPath().get(identifier);
+        return ((TextureManagerAccessor) SignedPaintingsClient.client.getTextureManager()).getByPath().get(identifier);
     }
 
     private static final long MAX_IMAGE_SIZE = 20L * 1024 * 1024; // 最大 20MB
@@ -400,21 +394,21 @@ public class ImageManager {
                     // 校验图片大小：必须有 Content-Length，且不超过 20MB，否则阻断
                     long contentLength = connection.getContentLengthLong();
                     if (contentLength < 0) {
-                        SignedPaintingsClient.info("blocked image with no Content-Length "+urlStr, true);
+                        SignedPaintingsClient.info("blocked image with no Content-Length " + urlStr, true);
                         return null;
                     }
                     if (contentLength > MAX_IMAGE_SIZE) {
-                        SignedPaintingsClient.info("blocked image exceeding "+MAX_IMAGE_SIZE+" bytes ("+contentLength+") "+urlStr, true);
+                        SignedPaintingsClient.info("blocked image exceeding " + MAX_IMAGE_SIZE + " bytes (" + contentLength + ") " + urlStr, true);
                         return null;
                     }
 
                     return ImageIO.read(connection.getInputStream());
                 } else {
-                    SignedPaintingsClient.info("invalid url string "+urlStr, false);
+                    SignedPaintingsClient.info("invalid url string " + urlStr, false);
                     return null;
                 }
             } catch (Throwable e) {
-                SignedPaintingsClient.info("error downloading image "+urlStr+" : "+e, true);
+                SignedPaintingsClient.info("error downloading image " + urlStr + " : " + e, true);
                 return null;
             }
         }, virtualThreadExecutor);
@@ -443,32 +437,6 @@ public class ImageManager {
         urlAliases.add(urlAlias);
     }
 
-    public boolean trustDomain(String domain) {
-        if (trustedDomains.add(domain)) {
-            SignedPaintingsClient.info("trusting domain "+domain, false);
-            reloadDomain(domain);
-            makeChange();
-            blockPromptedDomains.remove(domain);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean untrustDomain(String domain) {
-        if (trustedDomains.remove(domain)) {
-            SignedPaintingsClient.info("untrusting domain "+domain, false);
-            reloadDomain(domain);
-            makeChange();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean domainBlocked(String url) {
-        // 信任全部域名，不再做域名信任判断
-        return false;
-    }
-
     public String applyURLInferences(String text) {
         if (text.startsWith("ftp://")) {
             return text;
@@ -488,7 +456,7 @@ public class ImageManager {
 
         String url = applyURLAliases(text);
         if (!url.contains("://")) {
-            url = "https://"+url;
+            url = "https://" + url;
         }
         return url;
     }
@@ -517,7 +485,6 @@ public class ImageManager {
         }
         urlToImageData.clear();
         itemNameToOverlay.clear();
-        blockPromptedDomains.clear();
         renderTime = 0;
         return i;
     }
@@ -528,7 +495,7 @@ public class ImageManager {
         }
 
         int i = 0;
-        for (Iterator<Map.Entry<String, ImageData>> iterator = urlToImageData.entrySet().iterator(); iterator.hasNext();) {
+        for (Iterator<Map.Entry<String, ImageData>> iterator = urlToImageData.entrySet().iterator(); iterator.hasNext(); ) {
             Map.Entry<String, ImageData> imageData = iterator.next();
             if (imageData.getKey().startsWith(domain)) {
                 i += imageData.getValue().reload();

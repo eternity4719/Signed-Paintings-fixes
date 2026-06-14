@@ -20,7 +20,8 @@ import net.minecraft.world.level.block.entity.SignText;
 import org.joml.Vector3f;
 
 public class PaintingRenderer {
-    public PaintingRenderer() {}
+    public PaintingRenderer() {
+    }
 
     /*
     private record TranslucentRenderData(MatrixStack.Entry matrixEntry, PaintingInfo info, int light) {}
@@ -58,7 +59,7 @@ public class PaintingRenderer {
     public boolean renderSignPaintings(SignRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
         if (!SignedPaintingsClient.renderSigns) return false;
 
-        SignBlockEntityRenderStateAccessor accessor = (SignBlockEntityRenderStateAccessor)renderState;
+        SignBlockEntityRenderStateAccessor accessor = (SignBlockEntityRenderStateAccessor) renderState;
         boolean success = false;
         success |= renderSignPaintingInfo(accessor.signedPaintings$getFrontInfo(), accessor, queue, matrices, renderState, renderState.frontText);
         success |= renderSignPaintingInfo(accessor.signedPaintings$getBackInfo(), accessor, queue, matrices, renderState, renderState.backText);
@@ -74,10 +75,10 @@ public class PaintingRenderer {
     }
 
     public void modifySignRenderState(SignBlockEntity signBlockEntity, SignRenderState signBlockEntityRenderState) {
-        SignBlockEntityAccessor accessor = (SignBlockEntityAccessor)signBlockEntity;
+        SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) signBlockEntity;
         accessor.signedPaintings$reloadIfNeeded();
 
-        SignBlockEntityRenderStateAccessor state = (SignBlockEntityRenderStateAccessor)signBlockEntityRenderState;
+        SignBlockEntityRenderStateAccessor state = (SignBlockEntityRenderStateAccessor) signBlockEntityRenderState;
         state.signedPaintings$setFrontInfo(accessor.signedPaintings$getFrontPaintingInfo());
         state.signedPaintings$setBackInfo(accessor.signedPaintings$getBackPaintingInfo());
 
@@ -134,13 +135,13 @@ public class PaintingRenderer {
     }
 
     private void renderBack(PoseStack.Pose matrix, VertexConsumer vertexConsumer, TextureAtlasSprite backSprite, PaintingInfo info, int light) {
-        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0,  0,  -1), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
+        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0, 0, -1), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
 
-        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(1,  0,  0),  true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
-        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(-1, 0,  0),  true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
+        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(1, 0, 0), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
+        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(-1, 0, 0), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
 
-        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0,  1,  0),  true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
-        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0,  -1, 0),  true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
+        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0, 1, 0), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
+        info.cuboid.renderFace(matrix, vertexConsumer, new Vector3f(0, -1, 0), true, backSprite.getU0(), backSprite.getU1(), backSprite.getV0(), backSprite.getV1(), light);
     }
 
     public void renderImageOverlay(PoseStack matrices, SubmitNodeCollector queue, OverlayInfo info, int light, BannerFlagModel flagBlockModel, float pitch) {

@@ -1,11 +1,12 @@
 package com.nettakrim.signed_paintings.rendering;
 
-import org.joml.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.lang.Math;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class Cuboid {
     private final Vector3fc size;
@@ -17,26 +18,26 @@ public class Cuboid {
     }
 
     public static Cuboid CreateWallCuboid(float xSize, Centering.Type xCentering, float ySize, Centering.Type yCentering, float zSize) {
-        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), -0.0025f + (zSize/2));
+        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), -0.0025f + (zSize / 2));
     }
 
     public static Cuboid CreateFlushCuboid(float xSize, Centering.Type xCentering, float ySize, Centering.Type yCentering, float zSize) {
-        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), 1.0f - (zSize/2));
+        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), 1.0f - (zSize / 2));
     }
 
     public static Cuboid CreateCentralCuboid(float xSize, Centering.Type xCentering, float ySize, Centering.Type yCentering, float zSize) {
-        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), (zSize/2) - 0.0025f + 0.5f);
+        return new Cuboid(xSize, ySize, zSize, Centering.getOffset(xSize, xCentering), Centering.getOffset(ySize, yCentering), (zSize / 2) - 0.0025f + 0.5f);
     }
 
     public static Cuboid CreateOverlayCuboid(float aspectRatio) {
-        float width = 5/6f;
-        float height = 5/3f;
+        float width = 5 / 6f;
+        float height = 5 / 3f;
         if (aspectRatio > 0.5f) {
-            height /= aspectRatio*2;
+            height /= aspectRatio * 2;
         } else {
-            width *= aspectRatio*2;
+            width *= aspectRatio * 2;
         }
-        return new Cuboid(width, height, 1/8f, 0, -5/6f, 0);
+        return new Cuboid(width, height, 1 / 8f, 0, -5 / 6f, 0);
     }
 
     public void renderFace(PoseStack.Pose matrix, VertexConsumer vertexConsumer, Vector3f face, boolean split, float minU, float maxU, float minV, float maxV, int light) {
@@ -87,16 +88,16 @@ public class Cuboid {
 
         for (float minX = 0; minX < relevantSize.x; minX++) {
             for (float minY = 0; minY < relevantSize.y; minY++) {
-                float maxX = Math.min(minX+1, relevantSize.x);
-                float maxY = Math.min(minY+1, relevantSize.y);
+                float maxX = Math.min(minX + 1, relevantSize.x);
+                float maxY = Math.min(minY + 1, relevantSize.y);
 
-                float scaledMinX = (minX/relevantSize.x)-0.5f;
-                float scaledMaxX = (maxX/relevantSize.x)-0.5f;
-                float scaledMinY = (minY/relevantSize.y)-0.5f;
-                float scaledMaxY = (maxY/relevantSize.y)-0.5f;
+                float scaledMinX = (minX / relevantSize.x) - 0.5f;
+                float scaledMaxX = (maxX / relevantSize.x) - 0.5f;
+                float scaledMinY = (minY / relevantSize.y) - 0.5f;
+                float scaledMaxY = (maxY / relevantSize.y) - 0.5f;
 
-                float newMaxU = minU+((maxU-minU)*(maxX-minX));
-                float newMinV = maxV-((maxV-minV)*(maxY-minY));
+                float newMaxU = minU + ((maxU - minU) * (maxX - minX));
+                float newMinV = maxV - ((maxV - minV) * (maxY - minY));
 
                 renderQuad(matrix, vertexConsumer, scaledMinX, scaledMaxX, scaledMinY, scaledMaxY, rotation, minU, newMaxU, newMinV, maxV, normal, light);
             }

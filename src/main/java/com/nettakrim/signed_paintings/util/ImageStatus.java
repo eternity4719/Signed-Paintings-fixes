@@ -41,7 +41,8 @@ public class ImageStatus implements Comparable<ImageStatus> {
         return resolutionStatuses.size();
     }
 
-    public record ResolutionStatus (Vector2i pixels, long bytes, boolean isScaled) implements Comparable<ResolutionStatus> {
+    public record ResolutionStatus(Vector2i pixels, long bytes,
+                                   boolean isScaled) implements Comparable<ResolutionStatus> {
         @Override
         public int compareTo(ResolutionStatus other) {
             return Long.compare(bytes, other.bytes);

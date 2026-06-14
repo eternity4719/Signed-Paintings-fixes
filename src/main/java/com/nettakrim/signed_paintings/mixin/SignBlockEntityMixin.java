@@ -1,8 +1,9 @@
 package com.nettakrim.signed_paintings.mixin;
 
-import com.nettakrim.signed_paintings.*;
+import com.nettakrim.signed_paintings.SignedPaintingsClient;
 import com.nettakrim.signed_paintings.access.SignBlockEntityAccessor;
-import com.nettakrim.signed_paintings.rendering.*;
+import com.nettakrim.signed_paintings.rendering.PaintingInfo;
+import com.nettakrim.signed_paintings.rendering.SignSideInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -66,13 +67,15 @@ public abstract class SignBlockEntityMixin extends BlockEntity implements SignBl
         }
     }
 
-    public SignBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {super(type, pos, state);}
+    public SignBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/level/block/entity/BlockEntityType;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V")
     private void onInit(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
         frontInfo = new SignSideInfo(frontText, null);
         backInfo = new SignSideInfo(backText, null);
-        entity = (SignBlockEntity)(Object)this;
+        entity = (SignBlockEntity) (Object) this;
     }
 
     @Inject(at = @At("TAIL"), method = "setText")
@@ -97,7 +100,7 @@ public abstract class SignBlockEntityMixin extends BlockEntity implements SignBl
     private void onNBTRead(ValueInput view, CallbackInfo ci) {
         frontInfo.text = frontText;
         backInfo.text = backText;
-        SignedPaintingsClient.info("nbt read "+frontText.getMessage(0, false).toString()+" at "+getBlockPos(), false);
+        SignedPaintingsClient.info("nbt read " + frontText.getMessage(0, false).toString() + " at " + getBlockPos(), false);
         frontInfo.loadPainting(true, entity, false);
         backInfo.loadPainting(false, entity, false);
     }

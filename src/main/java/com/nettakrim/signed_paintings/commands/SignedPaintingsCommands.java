@@ -36,7 +36,6 @@ public class SignedPaintingsCommands {
             root.addChild(ReloadCommand.getCommandNode());
             root.addChild(StatusCommand.getCommandNode());
             root.addChild(ToggleCommand.getCommandNode());
-            root.addChild(DomainCommand.getCommandNode());
         });
     }
 }
