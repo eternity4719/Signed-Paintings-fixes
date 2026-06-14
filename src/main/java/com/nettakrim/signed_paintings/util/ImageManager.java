@@ -472,12 +472,8 @@ public class ImageManager {
     }
 
     public boolean domainBlocked(String url) {
-        for (String trusted : trustedDomains) {
-            if (url.startsWith(trusted)) {
-                return false;
-            }
-        }
-        return true;
+        // 信任全部域名，不再做域名信任判断
+        return false;
     }
 
     public String applyURLInferences(String text) {
