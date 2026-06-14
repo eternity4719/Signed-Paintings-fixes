@@ -236,27 +236,6 @@ public class ImageManager {
 
         boolean blocked = blockedURLs.contains(url);
 
-        if (!blocked && domainBlocked(url)) {
-            String domain = SignedPaintingsClient.getDomain(url);
-            SignedPaintingsClient.info("Prompting domain trust for '"+ domain +"' from url '"+url+"'", false);
-
-            if (blockPromptedDomains.add(domain)) {
-                ClickEvent clickEvent = new ClickEvent.SuggestCommand("/paintings:domain trust " + domain);
-
-                SignedPaintingsClient.sayRaw(
-                        Component.translatable(SignedPaintingsClient.MODID + ".commands.domain.notify",
-                                Component.translatable(SignedPaintingsClient.MODID + ".commands.domain.notify.click")
-                                        .setStyle(Style.EMPTY.withColor(SignedPaintingsClient.nameTextColor).withClickEvent(clickEvent)
-                                        ),
-                                domain
-                        ).setStyle(Style.EMPTY.withColor(SignedPaintingsClient.textColor).withClickEvent(clickEvent))
-                );
-            }
-
-            blocked = true;
-        }
-
-
         if (!blocked && autoBlockNew) {
             SignedPaintingsClient.sayRaw(
                 Component.translatable(SignedPaintingsClient.MODID+".commands.block.notify.base",
@@ -404,6 +383,8 @@ public class ImageManager {
         return ((TextureManagerAccessor)SignedPaintingsClient.client.getTextureManager()).getByPath().get(identifier);
     }
 
+    private static final long MAX_IMAGE_SIZE = 20L * 1024 * 1024; // 最大 20MB
+
     private CompletableFuture<BufferedImage> downloadImageBuffer(String urlStr) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -415,6 +396,18 @@ public class ImageManager {
                         connection.setRequestProperty("Referer", "https://imgur.com/");
                     }
                     connection.connect();
+
+                    // 校验图片大小：必须有 Content-Length，且不超过 20MB，否则阻断
+                    long contentLength = connection.getContentLengthLong();
+                    if (contentLength < 0) {
+                        SignedPaintingsClient.info("blocked image with no Content-Length "+urlStr, true);
+                        return null;
+                    }
+                    if (contentLength > MAX_IMAGE_SIZE) {
+                        SignedPaintingsClient.info("blocked image exceeding "+MAX_IMAGE_SIZE+" bytes ("+contentLength+") "+urlStr, true);
+                        return null;
+                    }
+
                     return ImageIO.read(connection.getInputStream());
                 } else {
                     SignedPaintingsClient.info("invalid url string "+urlStr, false);
