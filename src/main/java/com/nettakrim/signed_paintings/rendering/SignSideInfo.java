@@ -29,15 +29,15 @@ public class SignSideInfo {
         loadURL(url, parts.length > 1 ? parts[1] : "", isFront, blockEntity, working);
     }
 
-    public String getData(){
+    public String getData() {
         String[] parts = getParts(true);
         if (parts.length == 1) {
-            return parts[0]+"|";
+            return parts[0] + "|";
         }
         return String.join("|", parts);
     }
 
-    public String getUrl(){
+    public String getUrl() {
         return SignedPaintingsClient.imageManager.applyURLInferences(getParts(true)[0]);
     }
 
@@ -64,7 +64,7 @@ public class SignSideInfo {
     }
 
     public void updateInfo(ImageData data, String afterURL, boolean isFront, SignBlockEntity blockEntity, boolean working) {
-        SignedPaintingsClient.info("updating painting info for "+data.getBaseIdentifier(), false);
+        SignedPaintingsClient.info("updating painting info for " + data.getBaseIdentifier(), false);
         if (paintingInfo == null) {
             paintingInfo = new PaintingInfo(data, isFront, blockEntity);
         } else {
@@ -74,10 +74,10 @@ public class SignSideInfo {
 
         cache.init(paintingInfo, paintingInfo.signType);
 
-        SignedPaintingsClient.info("loading extra data \""+afterURL+"\"", false);
+        SignedPaintingsClient.info("loading extra data \"" + afterURL + "\"", false);
         updateCache(afterURL);
 
-        if (data.ready && SignedPaintingsClient.currentSignEdit != null && ((SignBlockEntityAccessor)SignedPaintingsClient.currentSignEdit.sign).signedPaintings$hasSignSideInfo(this)) {
+        if (data.ready && SignedPaintingsClient.currentSignEdit != null && ((SignBlockEntityAccessor) SignedPaintingsClient.currentSignEdit.sign).signedPaintings$hasSignSideInfo(this)) {
             SignedPaintingsClient.currentSignEdit.screen.signedPaintings$setVisibility(true);
             SignedPaintingsClient.currentSignEdit.screen.signedPaintings$initSliders(this);
         }
@@ -219,7 +219,7 @@ public class SignSideInfo {
             if (currentIndex < parts.length && tryParseXOffset(parts[currentIndex])) currentIndex++;
 
             if (currentIndex < parts.length && tryParseZOffset(parts[currentIndex])) currentIndex++;
-            
+
             if (currentIndex < parts.length && tryParseRotationVec(parts[currentIndex])) currentIndex++;
 
             StringBuilder builder = new StringBuilder();
@@ -244,8 +244,8 @@ public class SignSideInfo {
             String[] parts = s.split("[/:]");
             float[] values = new float[2];
             try {
-                values[0] = Mth.clamp(Float.parseFloat(parts[0]), 1f/32f, 64f);
-                values[1] = Mth.clamp(Float.parseFloat(parts[1]), 1f/32f, 64f);
+                values[0] = Mth.clamp(Float.parseFloat(parts[0]), 1f / 32f, 64f);
+                values[1] = Mth.clamp(Float.parseFloat(parts[1]), 1f / 32f, 64f);
             } catch (Exception ignored) {
                 return false;
             }
@@ -328,16 +328,16 @@ public class SignSideInfo {
 
         private String getShortFloatString(float value) {
             String s = SignedPaintingsClient.floatToStringDP(value, 5);
-            s = s.contains(".") ? s.replaceAll("\\.?0*$","") : s;
-            s = s.replaceAll("\\.66[67]+$",".667");
-            s = s.replaceAll("\\.333+$",".333");
+            s = s.contains(".") ? s.replaceAll("\\.?0*$", "") : s;
+            s = s.replaceAll("\\.66[67]+$", ".667");
+            s = s.replaceAll("\\.333+$", ".333");
             return s;
         }
 
         private String getRotString(Vector3f rotationVec) {
             return getShortFloatString(rotationVec.x) + "," +
-                   getShortFloatString(rotationVec.y) + "," +
-                   getShortFloatString(rotationVec.z);
+                    getShortFloatString(rotationVec.y) + "," +
+                    getShortFloatString(rotationVec.z);
         }
     }
 }

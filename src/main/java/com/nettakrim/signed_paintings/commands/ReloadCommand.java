@@ -14,8 +14,8 @@ public class ReloadCommand {
                 .executes(ReloadCommand::reloadAll)
                 .then(
                         ClientCommands.argument("url", StringArgumentType.greedyString())
-                        .suggests(SignedPaintingsCommands.images)
-                        .executes(ReloadCommand::reload)
+                                .suggests(SignedPaintingsCommands.images)
+                                .executes(ReloadCommand::reload)
                 )
                 .build();
 

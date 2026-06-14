@@ -85,6 +85,6 @@ public class ToggleCommand {
     }
 
     private static void sayMessage(String key, boolean isOn) {
-        SignedPaintingsClient.sayTranslated("commands.toggle."+key+(isOn ? ".on" : ".off"));
+        SignedPaintingsClient.sayTranslated("commands.toggle." + key + (isOn ? ".on" : ".off"));
     }
 }

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -19,8 +20,8 @@ public class StatusCommand {
                 .executes(StatusCommand::statusAll)
                 .then(
                         ClientCommands.argument("url", StringArgumentType.greedyString())
-                        .suggests(SignedPaintingsCommands.images)
-                        .executes(StatusCommand::status)
+                                .suggests(SignedPaintingsCommands.images)
+                                .executes(StatusCommand::status)
                 )
                 .build();
 
@@ -64,8 +65,8 @@ public class StatusCommand {
 
         status.resolutionStatuses.sort(Collections.reverseOrder());
         for (ImageStatus.ResolutionStatus r : status.resolutionStatuses) {
-            String size = r.pixels().x+"x"+r.pixels().y;
-            text.append(getStatusText("size."+(r.isScaled() ? "scaled" : "default"), getKBString(r.bytes()), size));
+            String size = r.pixels().x + "x" + r.pixels().y;
+            text.append(getStatusText("size." + (r.isScaled() ? "scaled" : "default"), getKBString(r.bytes()), size));
         }
 
         SignedPaintingsClient.longSay(text);
@@ -73,7 +74,7 @@ public class StatusCommand {
     }
 
     private static String getKBString(long bytes) {
-        float amount = bytes/1024f;
+        float amount = bytes / 1024f;
         String unit = "KB";
         if (amount > 1024f) {
             amount /= 1024f;
@@ -81,11 +82,11 @@ public class StatusCommand {
         }
         String s = Float.toString(SignedPaintingsClient.roundFloatTo3DP(amount));
         int index = s.indexOf('.');
-        if (index >= 4) return s.substring(0, index)+unit;
-        return s.substring(0, Math.min(5, s.length()))+unit;
+        if (index >= 4) return s.substring(0, index) + unit;
+        return s.substring(0, Math.min(5, s.length())) + unit;
     }
 
     private static MutableComponent getStatusText(String key, Object... args) {
-        return Component.translatable(SignedPaintingsClient.MODID+".commands.status."+key, args);
+        return Component.translatable(SignedPaintingsClient.MODID + ".commands.status." + key, args);
     }
 }

@@ -51,7 +51,7 @@ public class BBEEntryPoint implements BBEApiEntryPoint {
 
         @Override
         public boolean shouldRender(SignBlockEntity blockEntity, Vec3 cameraPosition) {
-            return SignedPaintingsClient.paintingRenderer.renderWithReducedCulling((SignBlockEntityAccessor)blockEntity) || AltRenderer.super.shouldRender(blockEntity, cameraPosition);
+            return SignedPaintingsClient.paintingRenderer.renderWithReducedCulling((SignBlockEntityAccessor) blockEntity) || AltRenderer.super.shouldRender(blockEntity, cameraPosition);
         }
     }
 
@@ -78,7 +78,7 @@ public class BBEEntryPoint implements BBEApiEntryPoint {
 
             OverlayInfoAccessor accessor = (OverlayInfoAccessor) blockEntity;
             accessor.signedPaintings$reloadIfNeeded();
-            ((BannerBlockEntityRenderStateAccessor)renderState).signedPaintings$setOverlayInfo(accessor.signedPaintings$getOverlayInfo());
+            ((BannerBlockEntityRenderStateAccessor) renderState).signedPaintings$setOverlayInfo(accessor.signedPaintings$getOverlayInfo());
         }
 
         public void submit(final BannerRenderState state, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final CameraRenderState camera) {
@@ -86,7 +86,7 @@ public class BBEEntryPoint implements BBEApiEntryPoint {
                 return;
             }
 
-            OverlayInfo overlayInfo = ((BannerBlockEntityRenderStateAccessor)state).signedPaintings$getOverlayInfo();
+            OverlayInfo overlayInfo = ((BannerBlockEntityRenderStateAccessor) state).signedPaintings$getOverlayInfo();
             if (overlayInfo == null || !overlayInfo.isReady()) return;
 
             poseStack.pushPose();

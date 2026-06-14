@@ -1,10 +1,12 @@
 # Signed Paintings
 
-Bring your own custom images into the game as vanilla-like paintings using signs - anyone else with the mod will see them too! Just paste in an image URL into an empty sign!
+Bring your own custom images into the game as vanilla-like paintings using signs - anyone else with the mod will see
+them too! Just paste in an image URL into an empty sign!
 
 Tweak the size and positioning of the painting within the sign's UI and see the changes live.
 
-The mod can automatically scale the images to make them pixel consistent with Minecraft so they fit in - even for higher resolution texture packs
+The mod can automatically scale the images to make them pixel consistent with Minecraft so they fit in - even for higher
+resolution texture packs
 
 Avoid having to make map art!
 
@@ -25,7 +27,8 @@ Avoid having to make map art!
 
 `/paintings:toggle all|banners|shields|signs` - toggles rendering for images
 
-`/paintings:toggle culling` - makes signs visible from further away, at the cost of worse fps - use [this mod](https://modrinth.com/mod/beer) instead if you want a bit more control over the distance
+`/paintings:toggle culling` - makes signs visible from further away, at the cost of worse fps -
+use [this mod](https://modrinth.com/mod/beer) instead if you want a bit more control over the distance
 
 `/paintings:reload all|<url>` - redownload all or a specific image
 
@@ -51,7 +54,8 @@ I use a high-re texture pack, does the pixel filter support this?
 
 Do I need to be connected to the internet to use the mod?
 
-> Yes, the mod downloads images from the Internet so a connection is a must! (loaded images will be cached for your current session, instead of redownloading for every individual sign)
+> Yes, the mod downloads images from the Internet so a connection is a must! (loaded images will be cached for your
+> current session, instead of redownloading for every individual sign)
 
 Will my friends see the custom painting?
 
@@ -59,8 +63,12 @@ Will my friends see the custom painting?
 
 What if my friends don't have the mod?
 
-> They will see a sign with a URL and some text for the settings. However, you can hide the sign underground then shift the painting up using the offset slider (the text may also be compressed, in which case it would look like a bunch of thin lines)
+> They will see a sign with a URL and some text for the settings. However, you can hide the sign underground then shift
+> the painting up using the offset slider (the text may also be compressed, in which case it would look like a bunch of
+> thin lines)
 
 Fabric? Forge? Quilt? Backports?
 
-> The mod is developed for the latest versions Fabric, and while untested for Quilt it should work - Forge is currently unsupported, [Sinytra Connector](https://modrinth.com/mod/connector) may allow it to work on forge, but dont be suprised if you encounter bugs!
+> The mod is developed for the latest versions Fabric, and while untested for Quilt it should work - Forge is currently
+> unsupported, [Sinytra Connector](https://modrinth.com/mod/connector) may allow it to work on forge, but dont be suprised
+> if you encounter bugs!

@@ -27,7 +27,7 @@ public abstract class ImageInfo {
     }
 
     private void updateCuboid() {
-        this.cuboid = Cuboid.CreateOverlayCuboid((float)this.image.width/this.image.height);
+        this.cuboid = Cuboid.CreateOverlayCuboid((float) this.image.width / this.image.height);
     }
 
     public void invalidateImage() {

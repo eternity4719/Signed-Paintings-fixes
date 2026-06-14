@@ -50,7 +50,7 @@ public class URLAlias {
             }
             if (current.equals(domain)) return url;
         }
-        url = shortest+url.substring(current.length());
+        url = shortest + url.substring(current.length());
         return url;
     }
 }

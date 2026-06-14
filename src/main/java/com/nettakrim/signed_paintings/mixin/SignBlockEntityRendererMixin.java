@@ -31,7 +31,7 @@ public abstract class SignBlockEntityRendererMixin implements BlockEntityRendere
 
     @Override
     public boolean shouldRender(@NonNull SignBlockEntity blockEntity, @NonNull Vec3 cameraPosition) {
-        return SignedPaintingsClient.paintingRenderer.renderWithReducedCulling((SignBlockEntityAccessor)blockEntity) || BlockEntityRenderer.super.shouldRender(blockEntity, cameraPosition);
+        return SignedPaintingsClient.paintingRenderer.renderWithReducedCulling((SignBlockEntityAccessor) blockEntity) || BlockEntityRenderer.super.shouldRender(blockEntity, cameraPosition);
     }
 
     @Inject(at = @At("TAIL"), method = "extractRenderState(Lnet/minecraft/world/level/block/entity/SignBlockEntity;Lnet/minecraft/client/renderer/blockentity/state/SignRenderState;FLnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V")

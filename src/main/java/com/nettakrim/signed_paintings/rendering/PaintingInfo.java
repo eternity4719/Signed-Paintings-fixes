@@ -36,7 +36,7 @@ public class PaintingInfo extends ImageInfo {
 
     private float pixelsPerBlock;
 
-    private static final Vector3f zero = new Vector3f(0,0,0);
+    private static final Vector3f zero = new Vector3f(0, 0, 0);
 
     public boolean working;
     private boolean needsBackUpdate = false;
@@ -57,8 +57,8 @@ public class PaintingInfo extends ImageInfo {
     }
 
     public void resetSize() {
-        this.width = image.width/16f;
-        this.height = image.height/16f;
+        this.width = image.width / 16f;
+        this.height = image.height / 16f;
         while (this.width > 8 || this.height > 8) {
             this.width /= 2f;
             this.height /= 2f;
@@ -70,11 +70,12 @@ public class PaintingInfo extends ImageInfo {
 
     private void updateCuboid() {
         float reducedDepth = this.depth;
-        if (backType == BackType.Type.NONE) reducedDepth = 1/256f;
+        if (backType == BackType.Type.NONE) reducedDepth = 1 / 256f;
         this.cuboid = switch (signType) {
-            case WALL                  -> Cuboid.CreateWallCuboid(    width, xCentering, height, yCentering, reducedDepth);
-            case STANDING              -> Cuboid.CreateFlushCuboid(   width, xCentering, height, yCentering, reducedDepth);
-            case HANGING, WALL_HANGING -> Cuboid.CreateCentralCuboid( width, xCentering, height, yCentering, reducedDepth);
+            case WALL -> Cuboid.CreateWallCuboid(width, xCentering, height, yCentering, reducedDepth);
+            case STANDING -> Cuboid.CreateFlushCuboid(width, xCentering, height, yCentering, reducedDepth);
+            case HANGING, WALL_HANGING ->
+                    Cuboid.CreateCentralCuboid(width, xCentering, height, yCentering, reducedDepth);
         };
     }
 
@@ -85,7 +86,7 @@ public class PaintingInfo extends ImageInfo {
     }
 
     public int getCenterIndex() {
-        return (2-xCentering.getIndex()) + yCentering.getIndex()*3;
+        return (2 - xCentering.getIndex()) + yCentering.getIndex() * 3;
     }
 
     public void updateCuboidSize(float xSize, float ySize) {
@@ -132,12 +133,12 @@ public class PaintingInfo extends ImageInfo {
                 return;
             }
             BlockPos blockPos = this.blockEntity.getBlockPos();
-            double rotation = ((SignBlock)this.blockEntity.getBlockState().getBlock()).getYRotationDegrees(this.blockEntity.getBlockState());
+            double rotation = ((SignBlock) this.blockEntity.getBlockState().getBlock()).getYRotationDegrees(this.blockEntity.getBlockState());
             blockPos = switch (signType) {
                 case STANDING -> blockPos.below();
-                case WALL -> blockPos.relative(Direction.fromYRot(rotation+180), 1);
+                case WALL -> blockPos.relative(Direction.fromYRot(rotation + 180), 1);
                 case HANGING -> blockPos.above();
-                case WALL_HANGING -> getSolidWallHang(world, blockPos, Direction.fromYRot(rotation+90));
+                case WALL_HANGING -> getSolidWallHang(world, blockPos, Direction.fromYRot(rotation + 90));
             };
             blockState = world.getBlockState(blockPos);
 
@@ -154,8 +155,9 @@ public class PaintingInfo extends ImageInfo {
         if (this.backType == BackType.Type.SIGN) {
             String name = ((SignBlock) this.blockEntity.getBlockState().getBlock()).type().name();
             try {
-                back = SignedPaintingsClient.client.getAtlasManager().get(new SpriteId( Identifier.fromNamespaceAndPath("minecraft", "textures/atlas/blocks.png"), Identifier.fromNamespaceAndPath("minecraft", "block/" + name + "_planks")));
-            } catch (Exception ignored) {}
+                back = SignedPaintingsClient.client.getAtlasManager().get(new SpriteId(Identifier.fromNamespaceAndPath("minecraft", "textures/atlas/blocks.png"), Identifier.fromNamespaceAndPath("minecraft", "block/" + name + "_planks")));
+            } catch (Exception ignored) {
+            }
         }
         if (back == null) {
             back = SignedPaintingsClient.client.getModelManager().getBlockStateModelSet().getParticleMaterial(blockState).sprite();
@@ -172,7 +174,7 @@ public class PaintingInfo extends ImageInfo {
         if (pixelsPerBlock == 0) {
             return super.getImageIdentifier();
         } else {
-            return image.getIdentifier(Math.round(width*pixelsPerBlock), Math.round(height*pixelsPerBlock), working);
+            return image.getIdentifier(Math.round(width * pixelsPerBlock), Math.round(height * pixelsPerBlock), working);
         }
     }
 
