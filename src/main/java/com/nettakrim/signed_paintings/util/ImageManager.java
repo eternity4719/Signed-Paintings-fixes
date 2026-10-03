@@ -14,23 +14,16 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.PngInfo;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBImage;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -309,52 +302,31 @@ public class ImageManager {
             SignedPaintingsClient.info("ImageManager instance not available for transparency check: " + identifier, true);
         }
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
-        try {
-            ImageIO.write(bufferedImage, "png", stream);
-        } catch (IOException e) {
-            SignedPaintingsClient.info("Failed to convert/register BufferedImage for identifier \"" + identifier + "\": " + e.getMessage(), true);
-            if (SignedPaintingsClient.imageManager != null) {
-                SignedPaintingsClient.imageManager.translucencyCache.put(identifier, false);
-            }
+        if (bufferedImage == null) {
             return;
         }
 
-        byte[] bytes = stream.toByteArray();
-
-        ByteBuffer data = BufferUtils.createByteBuffer(bytes.length).put(bytes);
-        data.flip();
-
-        try {
-            PngInfo.validateHeader(data);
-
-            try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-                IntBuffer xBuffer = memoryStack.mallocInt(1);
-                IntBuffer yBuffer = memoryStack.mallocInt(1);
-                IntBuffer channelBuffer = memoryStack.mallocInt(1);
-                ByteBuffer byteBuffer = STBImage.stbi_load_from_memory(data, xBuffer, yBuffer, channelBuffer, 4);
-
-                AtomicReference<NativeImage> nativeImage = new AtomicReference<>();
-                Minecraft.getInstance().executeBlocking(() ->
-                        nativeImage.set(new NativeImage(NativeImage.Format.RGBA, xBuffer.get(0), yBuffer.get(0), true)));
-
-                if (byteBuffer == null) {
-                    throw new IOException("Could not load image: " + STBImage.stbi_failure_reason());
-                }
-
-                var nativeImageBuffer = MemoryUtil.memByteBuffer(nativeImage.get().getPointer(),
-                        nativeImage.get().getHeight() * nativeImage.get().getWidth() * nativeImage.get().format().components());
-
-                MemoryUtil.memCopy(byteBuffer, nativeImageBuffer);
-                Minecraft.getInstance().executeBlocking(() -> {
-                    DynamicTexture texture = new DynamicTexture(identifier::toString, nativeImage.get());
-                    Minecraft.getInstance().getTextureManager().register(identifier, texture);
-                });
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // 直接把像素拷进 NativeImage, 不再 PNG 编码后交给 stb 解码:
+        // 原写法的 BufferUtils 堆外 buffer 在 stb 读取途中可能已被 GC 回收(随机 EXCEPTION_ACCESS_VIOLATION 于 lwjgl_stb.dll),
+        // 且 stb 解出的像素从未 stbi_image_free, 每张图泄漏一份
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        // getRGB 给 ARGB, NativeImage RGBA 在内存里是 R,G,B,A 字节, 按小端 int 读即 ABGR
+        for (int i = 0; i < pixels.length; i++) {
+            int argb = pixels[i];
+            pixels[i] = (argb & 0xFF00FF00) | ((argb >> 16) & 0xFF) | ((argb & 0xFF) << 16);
         }
+
+        AtomicReference<NativeImage> nativeImage = new AtomicReference<>();
+        Minecraft.getInstance().executeBlocking(() ->
+                nativeImage.set(new NativeImage(NativeImage.Format.RGBA, width, height, false)));
+
+        MemoryUtil.memIntBuffer(nativeImage.get().getPointer(), pixels.length).put(pixels);
+        Minecraft.getInstance().executeBlocking(() -> {
+            DynamicTexture texture = new DynamicTexture(identifier::toString, nativeImage.get());
+            Minecraft.getInstance().getTextureManager().register(identifier, texture);
+        });
     }
 
     public static CompletableFuture<Void> saveBufferedImageAsIdentifierAsync(BufferedImage bufferedImage, Identifier identifier) {
