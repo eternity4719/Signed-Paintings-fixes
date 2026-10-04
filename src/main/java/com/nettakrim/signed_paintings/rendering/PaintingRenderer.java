@@ -107,7 +107,7 @@ public class PaintingRenderer {
         matrices.mulPose(Axis.YP.rotationDegrees(info.rotationVec.y + (info.isFront ? 0 : 180) - rotation));
         matrices.mulPose(Axis.ZP.rotationDegrees(info.rotationVec.z));
         matrices.mulPose(Axis.XP.rotationDegrees(info.rotationVec.x));
-        matrices.translate(0.0f, 0.0f, -0.5f);
+        matrices.translate(0.0f, 0.0f, -0.5f + depthBias(info));
 
         if (info.hasTranslucency()) {
             // TODO: this
@@ -119,6 +119,18 @@ public class PaintingRenderer {
         }
         matrices.popPose();
         return true;
+    }
+
+    /** 前移步长(方块), 共 16 档, 最多前移约 1.5 厘米 */
+    private static final float DEPTH_BIAS_STEP = 0.001f;
+
+    /**
+     * 不同告示牌的图片摆在同一平面时深度相同, 显卡每帧判断的前后不一样, 重叠处来回闪烁。
+     * 按告示牌坐标给每块一个固定的微小前移, 谁在前恒定不变
+     */
+    private static float depthBias(PaintingInfo info) {
+        long hash = info.blockEntity.getBlockPos().asLong() * 0x9E3779B97F4A7C15L;
+        return (int) (hash >>> 60) * DEPTH_BIAS_STEP;
     }
 
     private void renderPainting(PoseStack matrices, SubmitNodeCollector queue, PaintingInfo info, int light, RenderType renderLayer) {
