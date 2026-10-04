@@ -30,6 +30,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class ImageManager {
     private final String dataHeader = "https://modrinth.com/mod/signed-paintings config v";
@@ -329,10 +330,13 @@ public class ImageManager {
         });
     }
 
-    public static CompletableFuture<Void> saveBufferedImageAsIdentifierAsync(BufferedImage bufferedImage, Identifier identifier) {
+    /**
+     * 图片在后台线程上生成(缩放等), 不占渲染线程
+     */
+    public static CompletableFuture<Void> saveBufferedImageAsIdentifierAsync(Supplier<BufferedImage> bufferedImage, Identifier identifier) {
         // https://discord.com/channels/507304429255393322/807617488313516032/934395931380576287
         return CompletableFuture.supplyAsync(() -> {
-            saveBufferedImageAsIdentifier(bufferedImage, identifier);
+            saveBufferedImageAsIdentifier(bufferedImage.get(), identifier);
             return null;
         }, singleThreadExecutor);
     }

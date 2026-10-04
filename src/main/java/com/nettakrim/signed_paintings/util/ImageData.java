@@ -70,26 +70,23 @@ public class ImageData {
 
             return workingIdentifier;
         } else {
-            Identifier identifier;
-            BufferedImage bufferedImage;
-
-            if (width == this.width && height == this.height) {
-                identifier = baseIdentifier;
-                bufferedImage = baseImage;
-            } else {
-                identifier = baseIdentifier.withSuffix("_" + width + "x" + height);
-                bufferedImage = scaleImage(baseImage, width, height);
-            }
-
-            if (identifier == null)
+            if (baseIdentifier == null)
                 return null;
 
-            if (loadingImages.contains(identifier))
+            boolean original = width == this.width && height == this.height;
+            Identifier identifier = original ? baseIdentifier : baseIdentifier.withSuffix("_" + width + "x" + height);
+
+            // 本方法每帧在渲染线程上被调用多次: 必须先判"已在加载"再动图片, 缩放也挪到后台线程。
+            // 原先每帧先在渲染线程上缩放一遍原图再判断, 大图在上传完成前反复缩放, 画面冻住好几秒
+            if (!loadingImages.add(identifier))
                 return identifier;
 
-            loadingImages.add(identifier);
-
-            ImageManager.saveBufferedImageAsIdentifierAsync(bufferedImage, identifier).handleAsync((v, e) -> {
+            BufferedImage source = baseImage;
+            int targetWidth = width;
+            int targetHeight = height;
+            ImageManager.saveBufferedImageAsIdentifierAsync(
+                    () -> original ? source : scaleImage(source, targetWidth, targetHeight), identifier
+            ).handleAsync((v, e) -> {
                 if (e != null) {
                     loadingImages.remove(identifier);
                     return null;
@@ -107,7 +104,8 @@ public class ImageData {
     private BufferedImage scaleImage(BufferedImage referenceImage, int width, int height) {
         width = Math.max(width, 1);
         height = Math.max(height, 1);
-        BufferedImage resizedImage = new BufferedImage(width, height, referenceImage.getType());
+        // 固定 INT_ARGB: 原图类型可能是调色板/TYPE_CUSTOM, 往调色板图上 drawImage 要逐像素匹配颜色极慢, TYPE_CUSTOM 直接抛异常
+        BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = resizedImage.createGraphics();
         // refer to https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
         //graphics2D.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
